@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>3d-points</title>
+	<style>
+		body{
+			margin: 0;
+			padding:0;
+			box-sizing: border-box;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body onload="onLoad()">
+	<div id="world"></div>
+	<script type="x-shader/x-vertex" id="vertexshader">
+		void main() {
+			gl_PointSize = 4.0;
+			gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+		}
+	</script>
+	<script type="x-shader/x-fragment" id="fragmentshader">
+		void main() {
+			gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+		}
+	</script>
+	<script src="./lib/three.min.js"></script>
+	<script src="./lib/stats.min.js"></script>
+	<script src="./lib/OrbitControls.js"></script>
+	<script src="./index.js"></script>
+</body>
+</html>

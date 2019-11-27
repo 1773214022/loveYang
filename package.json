@@ -1,0 +1,26 @@
+{
+  "name": "3dpoints",
+  "version": "1.0.0",
+  "description": "基于Three.js的粒子特效，采用GPU渲染。",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start": "serve",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/youngdro/3DPoints.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/youngdro/3DPoints/issues"
+  },
+  "homepage": "https://github.com/youngdro/3DPoints#readme",
+  "devDependencies": {
+    "serve": "^11.2.0"
+  }
+}
