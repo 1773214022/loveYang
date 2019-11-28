@@ -15,9 +15,52 @@
 <body onload="onLoad()">
 	<div id="world"></div>
 	<script type="x-shader/x-vertex" id="vertexshader">
+		uniform int number;
+		uniform float time;
+		attribute vec3 p0;
+		attribute vec3 p1;
+		attribute vec3 p2;
+		attribute vec3 p3;
+		attribute vec3 p4;
+		attribute vec3 p5;
+		attribute vec3 p6;
+		attribute vec3 p7;
+		attribute vec3 p8;
+		attribute vec3 p9;
+
+		vec3 resolvePosition(int i){
+			if(i == 0){
+				return p0;
+			} else if(i == 1){
+				return p1;
+			} else if(i == 2){
+				return p2;
+			} else if(i == 3){
+				return p3;
+			} else if(i == 4){
+				return p4;
+			} else if(i == 5){
+				return p5;
+			} else if(i == 6){
+				return p6;
+			} else if(i == 7){
+				return p7;
+			} else if(i == 8){
+				return p8;
+			} else if(i == 9){
+				return p9;
+			} else {
+				return p0;
+			}
+		}
+
 		void main() {
 			gl_PointSize = 4.0;
-			gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+			vec3 targetPosition = position;
+			targetPosition.x = resolvePosition(number).x * ( 1.0 - time ) + resolvePosition(number + 1).x * time;
+			targetPosition.y = resolvePosition(number).y * ( 1.0 - time ) + resolvePosition(number + 1).y * time;
+			targetPosition.z = resolvePosition(number).z * ( 1.0 - time ) + resolvePosition(number + 1).z * time;
+			gl_Position = projectionMatrix * modelViewMatrix * vec4(targetPosition, 1.0);
 		}
 	</script>
 	<script type="x-shader/x-fragment" id="fragmentshader">

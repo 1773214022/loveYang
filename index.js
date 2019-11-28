@@ -85,48 +85,93 @@ class ThreeDWorld {
     // 模型加入场景
     addObjs() {
         var loader = new THREE.FontLoader();
-        loader.load('optimer_regular.typeface.json', (font) => {
-            var helloGeometry = new THREE.TextGeometry("Hello", {
-                font: font,
-                size: 80,
-                height: 5,
-                curveSegments: 12,
-                bevelEnabled: true,
-                bevelThickness: 10,
-                bevelSize: 8,
-                bevelOffset: 0,
-                bevelSegments: 5
-            })
-            helloGeometry.scale(0.5, 0.5, 0.5);
-            helloGeometry.translate(10.0, 10.0, 10.0);
-            // helloGeometry.rotateX(-Math.PI / 2);
-            // worldGeometry.scale(0.1, 0.1, 0.1);
-            // worldGeometry.rotateX(-Math.PI / 2);
-            this.addPartices(helloGeometry);
+        loader.load('LESLIE.json', (font) => {
+            var geometrys = new Array(10)
+            for(var i = 0; i < 10; i++){
+                geometrys[i] = new THREE.TextGeometry(String.fromCharCode(48 + i), {
+                    font: font,
+                    size: 64,
+                    height: 8
+                })
+            }
+            // var meshMaterial = new THREE.MeshNormalMaterial({
+            //     flatShading: THREE.FlatShading,
+            //     transparent: true,
+            //     opacity: 0.9
+            // });
+            // var mesh = new THREE.Mesh(helloGeometry, meshMaterial);
+            // this.scene.add(mesh);
+            this.addPartices(geometrys);
         })
     }
-    // 几何模型转缓存几何模型
-    toBufferGeometry(geometry) {
-        if (geometry.type === 'BufferGeometry') return geometry;
-        return new THREE.BufferGeometry().fromGeometry(geometry);
+
+    fillMeshToFloat32Array(geometry, count) {
+        var mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide }));
+        var result = new Float32Array(count * 3)
+        var raycaster = new THREE.Raycaster()
+        mesh.geometry.computeBoundingBox()
+        var boundingBox = mesh.geometry.boundingBox
+        while (count >= 0) {
+            var point = this.randomVector3(boundingBox.min, boundingBox.max)
+            raycaster.set(point, new THREE.Vector3(1, 1, 1))
+            var intersectsOne = raycaster.intersectObject(mesh)
+            raycaster.set(point, new THREE.Vector3(-1, -1, -1))
+            var intersectsTow = raycaster.intersectObject(mesh)
+            if (intersectsOne.length % 2 === 1 || intersectsTow.length % 2 === 1) { // Points is in objet
+                count--;
+                result[count * 3] = point.x;
+                result[count * 3 + 1] = point.y;
+                result[count * 3 + 2] = point.z;
+            }
+        }
+        return result;
     }
+
+    randomVector3(min, max) {
+        const result = new THREE.Vector3()
+        result.x = min.x + (max.x - min.x) * Math.random()
+        result.y = min.y + (max.y - min.y) * Math.random()
+        result.z = min.z + (max.z - min.z) * Math.random()
+        return result;
+    }
+
     // 粒子变换
-    addPartices(obj) {
+    addPartices(geometrys) {
         // 着色器材料
         let shaderMaterial = new THREE.ShaderMaterial({
+            uniforms:{
+                time: {
+                    type:'f',value: 0.2
+                },
+                number: {
+                    type:'i',value: 0
+                }
+            },
             vertexShader: document.getElementById('vertexshader').textContent,
             fragmentShader: document.getElementById('fragmentshader').textContent,
             blending: THREE.AdditiveBlending,
             depthTest: false,
             transparent: true
         });
+        var bufferGeometry = new THREE.BufferGeometry();
+        for(var i = 0; i < 10; i++){
+            var vertexs = this.fillMeshToFloat32Array(geometrys[i], 3000);
+            if(i == 0){
+                bufferGeometry.addAttribute('position', new THREE.BufferAttribute(vertexs, 3));
+            }
+            bufferGeometry.addAttribute('p' + i, new THREE.BufferAttribute(vertexs, 3));
+        }
         // 创建粒子系统
-        let particleSystem = new THREE.Points(this.toBufferGeometry(obj), shaderMaterial);
+        let particleSystem = new THREE.Points(bufferGeometry, shaderMaterial);
         this.scene.add(particleSystem);
         this.particleSystem = particleSystem;
     }
     update() {
         this.stats.update();
+        if(this.particleSystem){
+            this.particleSystem.material.uniforms.time.value = Date.now() % 1000 / 1000
+            this.particleSystem.material.uniforms.number.value = Math.floor(Date.now() / 1000) % 10
+        }
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(() => {
             this.update()
