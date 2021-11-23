@@ -15,7 +15,8 @@
 <body onload="onLoad()">
 	<div id="world"></div>
 	<script type="x-shader/x-vertex" id="vertexshader">
-		uniform int number;
+		uniform int next;
+		uniform int current;
 		uniform float time;
 		uniform float process;
 		varying float opacity;
@@ -29,6 +30,8 @@
 		attribute vec3 p7;
 		attribute vec3 p8;
 		attribute vec3 p9;
+		attribute vec3 p10;
+		attribute vec3 p11;
 
 		vec3 resolvePosition(int i){
 			if(i == 0){
@@ -51,18 +54,22 @@
 				return p8;
 			} else if(i == 9){
 				return p9;
+			} else if(i == 10) {
+				return p10;
+			} else if(i == 11) {
+				return p11;
 			} else {
 				return p0;
 			}
 		}
 
 		void main() {
-			vec3 currentPosition = resolvePosition(number);
-			vec3 nextPosition = resolvePosition(number + 1);
+			vec3 currentPosition = resolvePosition(current);
+			vec3 nextPosition = resolvePosition(next);
 			vec3 targetPosition = currentPosition * ( 1.0 - process ) + nextPosition * process;
 			gl_Position = projectionMatrix * modelViewMatrix * vec4(targetPosition, 1.0);
-			opacity = gl_Position.z / 400.0;
-			gl_PointSize = 400.0 / gl_Position.z * sin((position.x + position.y + position.z) + time * 10.0);
+			opacity = gl_Position.z / 150.0;
+			gl_PointSize = 800.0 / gl_Position.z * sin((position.x + position.y + position.z) + time * 3.14 * 2.0);
 		}
 	</script>
 	<script type="x-shader/x-fragment" id="fragmentshader">
@@ -71,7 +78,7 @@
 			if (dot(gl_PointCoord-0.5,gl_PointCoord-0.5)>0.25) {
 				discard;
 			} else {
-				gl_FragColor = vec4(1.0, 1.0, 1.0, opacity);
+				gl_FragColor = vec4(1.0, 0.5, 0.5, opacity);
 			}
 		}
 	</script>
