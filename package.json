@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/youngdro/3DPoints#readme",
   "devDependencies": {
-    "serve": "^11.2.0"
+    "serve": "^13.0.2"
   }
 }

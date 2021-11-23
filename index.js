@@ -11,6 +11,7 @@ class ThreeDWorld {
         this.addObjs();
         // 轨道控制插件（鼠标拖拽视角、缩放等）
         this.orbitControls = new THREE.OrbitControls(this.camera);
+        this.cubic = BezierEasing(0.25, 0.1, 0.25, 1);
         // this.orbitControls.autoRotate = true;
         // 循环更新场景
         this.update();
@@ -43,7 +44,7 @@ class ThreeDWorld {
 
         // 设置相机的位置
         this.camera.position.x = 0;
-        this.camera.position.z = 150;
+        this.camera.position.z = 100;
         this.camera.position.y = 0;
         // 创建渲染器
         this.renderer = new THREE.WebGLRenderer({
@@ -94,13 +95,6 @@ class ThreeDWorld {
                     height: 8
                 })
             }
-            // var meshMaterial = new THREE.MeshNormalMaterial({
-            //     flatShading: THREE.FlatShading,
-            //     transparent: true,
-            //     opacity: 0.9
-            // });
-            // var mesh = new THREE.Mesh(helloGeometry, meshMaterial);
-            // this.scene.add(mesh);
             this.addPartices(geometrys);
         })
     }
@@ -143,6 +137,9 @@ class ThreeDWorld {
                 time: {
                     type:'f',value: 0.2
                 },
+                process: {
+                    type:'f',value: 0.0
+                },
                 number: {
                     type:'i',value: 0
                 }
@@ -157,12 +154,14 @@ class ThreeDWorld {
         for(var i = 0; i < 10; i++){
             var vertexs = this.fillMeshToFloat32Array(geometrys[i], 3000);
             if(i == 0){
-                bufferGeometry.addAttribute('position', new THREE.BufferAttribute(vertexs, 3));
+                bufferGeometry.setAttribute('position', new THREE.BufferAttribute(vertexs, 3));
             }
-            bufferGeometry.addAttribute('p' + i, new THREE.BufferAttribute(vertexs, 3));
+            bufferGeometry.setAttribute('p' + i, new THREE.BufferAttribute(vertexs, 3));
         }
         // 创建粒子系统
         let particleSystem = new THREE.Points(bufferGeometry, shaderMaterial);
+        particleSystem.translateX(-16);
+        particleSystem.translateY(-32);
         this.scene.add(particleSystem);
         this.particleSystem = particleSystem;
     }
@@ -171,6 +170,7 @@ class ThreeDWorld {
         if(this.particleSystem){
             this.particleSystem.material.uniforms.time.value = Date.now() % 1000 / 1000
             this.particleSystem.material.uniforms.number.value = Math.floor(Date.now() / 1000) % 10
+            this.particleSystem.material.uniforms.process.value = this.cubic(Date.now() % 1000 / 1000)
         }
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(() => {
