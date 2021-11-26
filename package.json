@@ -7,8 +7,8 @@
     "lib": "lib"
   },
   "scripts": {
-    "start": "serve",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --mode=production",
+    "start": "webpack serve --mode=development"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,18 @@
   },
   "homepage": "https://github.com/youngdro/3DPoints#readme",
   "devDependencies": {
-    "serve": "^13.0.2"
+    "css-loader": "^6.5.1",
+    "html-webpack-plugin": "^5.5.0",
+    "raw-loader": "^4.0.2",
+    "serve": "^13.0.2",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.64.4",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.6.0"
+  },
+  "dependencies": {
+    "bezier-easing": "^2.1.0",
+    "stats.js": "^0.17.0",
+    "three": "^0.134.0"
   }
 }
