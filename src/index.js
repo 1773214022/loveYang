@@ -33,13 +33,11 @@ class ThreeDWorld {
         this.WIDTH = window.innerWidth;
         // 创建场景
         this.scene = new THREE.Scene();
-        // 在场景中添加雾的效果，参数分别代表‘雾的颜色’、‘开始雾化的视线距离’、刚好雾化至看不见的视线距离’
-        this.scene.fog = new THREE.Fog(0x090918, 1, 600);
         // 创建相机
         let aspectRatio = this.WIDTH / this.HEIGHT;
-        let fieldOfView = 60;
         let nearPlane = 1;
-        let farPlane = 10000;
+        let farPlane = 1000;
+        let fieldOfView = 45;
         /**
          * PerspectiveCamera 透视相机
          * @param fieldOfView 视角
@@ -65,8 +63,8 @@ class ThreeDWorld {
             // 开启抗锯齿
             antialias: true
         });
-        // 渲染背景颜色同雾化的颜色
-        this.renderer.setClearColor(this.scene.fog.color);
+        // 黑色背景
+        this.renderer.setClearColor(0x000000);
         // 定义渲染器的尺寸；在这里它会填满整个屏幕
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
 
