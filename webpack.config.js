@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
@@ -9,6 +10,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: 'Output Management',
     }),
+    new CopyWebpackPlugin({patterns: [{
+      from:path.resolve(__dirname, 'src/static'),
+        to: 'static'
+    }]}),
   ],
   output: {
     filename: '[name].bundle.js',
@@ -16,10 +21,6 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.(json)$/i,
-        type: 'asset/resource',
-      },
       { test: /\.(frag|vert)$/, use: 'raw-loader' },
       { test: /\.(css)$/, use: ['style-loader', 'css-loader'] }
     ]

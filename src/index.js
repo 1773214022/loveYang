@@ -1,17 +1,18 @@
 import * as THREE from 'three';
-import css from './index.css';
 import Stats from 'stats.js';
+import css from './index.css';
 import BezierEasing from 'bezier-easing'
-import LESLIE from './LESLIE.json'
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import {FontLoader} from 'three/examples/jsm/loaders/FontLoader.js';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {TextGeometry} from 'three/examples/jsm/geometries/TextGeometry.js';
 import MainVert from './main.vert';
 import MainFrag from './main.frag';
+import Avatar from './avatar';
+import Effect from "./effect";
+import EffectNumber from "./effect-number";
 
-class ThreeDWorld {
+class LoveEffectThreeWorld {
     constructor(canvasContainer) {
-        // canvas容器
         this.container = canvasContainer || document.body;
         // 创建场景
         this.createScene();
@@ -19,20 +20,28 @@ class ThreeDWorld {
         // 性能监控插件
         this.initStats();
         // 物体添加
-        this.addObjs();
+        // this.initNumbers();
+        // this.number = new EffectNumber(this.scene)
+        // this.avatar = new Avatar(this.scene)
+        this.initNumbersWithCache();
         // 轨道控制插件（鼠标拖拽视角、缩放等）
         this.orbitControls = new OrbitControls(this.camera, this.container);
-        this.orbitControls.maxDistance = 300;
+        this.orbitControls.maxDistance = 1000;
         this.orbitControls.minDistance = 100;
         this.cubic = BezierEasing(0.25, 0.0, 0.25, 1.0);
         // 循环更新场景
         this.update();
     }
+
     createScene() {
         this.HEIGHT = window.innerHeight;
         this.WIDTH = window.innerWidth;
         // 创建场景
         this.scene = new THREE.Scene();
+        var dirLight = new THREE.PointLight(0xffffff, 3, 400);
+        dirLight.position.set(100, 100, 100);
+        this.scene.add(dirLight);
+
         // 创建相机
         let aspectRatio = this.WIDTH / this.HEIGHT;
         let nearPlane = 1;
@@ -54,7 +63,7 @@ class ThreeDWorld {
 
         // 设置相机的位置
         this.camera.position.x = 0;
-        this.camera.position.z = 200;
+        this.camera.position.z = 300;
         this.camera.position.y = 0;
         // 创建渲染器
         this.renderer = new THREE.WebGLRenderer({
@@ -102,63 +111,33 @@ class ThreeDWorld {
         this.camera.updateProjectionMatrix();
     }
     // 模型加入场景
-    addObjs() {
-        var loader = new FontLoader();
-        loader.load(LESLIE, (font) => {
-            var geometrys = new Array(12)
-            for(var i = 0; i < 10; i++){
-                geometrys[i] = new TextGeometry(String.fromCharCode(48 + i), {
+    initNumbers() {
+        const loader = new FontLoader();
+        loader.load('/static/LESLIE.json', (font) => {
+            const geometries = new Array(12);
+            for(let i = 0; i < 10; i++){
+                geometries[i] = new TextGeometry(String.fromCharCode(48 + i), {
                     font: font,
                     size: 64,
                     height: 8
                 })
             }
-            geometrys[10] = new TextGeometry(':', {
+            geometries[10] = new TextGeometry(':', {
                 font: font,
                 size: 64,
                 height: 8
             })
-            geometrys[11] = new TextGeometry('X', {
+            geometries[11] = new TextGeometry('X', {
                 font: font,
                 size: 64,
                 height: 8
             })
-            this.addPartices(geometrys);
+            this.initNumbersWithGeometries(geometries);
         })
     }
 
-    fillMeshByRaycaster(geometry, count) {
-        var mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide }));
-        var result = new Float32Array(count * 3)
-        var raycaster = new THREE.Raycaster()
-        mesh.geometry.computeBoundingBox()
-        var boundingBox = mesh.geometry.boundingBox
-        while (count >= 0) {
-            var point = this.randomVector3(boundingBox.min, boundingBox.max)
-            raycaster.set(point, new THREE.Vector3(1, 1, 1))
-            var intersectsOne = raycaster.intersectObject(mesh)
-            raycaster.set(point, new THREE.Vector3(-1, -1, -1))
-            var intersectsTow = raycaster.intersectObject(mesh)
-            if (intersectsOne.length % 2 === 1 || intersectsTow.length % 2 === 1) { // Points is in objet
-                count--;
-                result[count * 3] = point.x;
-                result[count * 3 + 1] = point.y;
-                result[count * 3 + 2] = point.z;
-            }
-        }
-        return result;
-    }
-
-    randomVector3(min, max) {
-        const result = new THREE.Vector3()
-        result.x = min.x + (max.x - min.x) * Math.random()
-        result.y = min.y + (max.y - min.y) * Math.random()
-        result.z = min.z + (max.z - min.z) * Math.random()
-        return result;
-    }
-
     // 粒子变换
-    addPartices(geometrys) {
+    initNumbersWithGeometries(geometries) {
         // 着色器材料
         let shaderMaterial = new THREE.ShaderMaterial({
             uniforms:{
@@ -181,16 +160,21 @@ class ThreeDWorld {
             depthTest: false,
             transparent: true
         });
-        var bufferGeometry = new THREE.BufferGeometry();
-        for(var i = 0; i < geometrys.length; i++){
+        const bufferGeometry = new THREE.BufferGeometry();
+        const numberVertexes = new Float32Array(geometries.length * 1000 * 3)
+        for(let i = 0; i < geometries.length; i++){
             console.log("Fill Mesh Use Raycaster Process: ", i);
-            var vertexs = this.fillMeshByRaycaster(geometrys[i], 1000);
-            if(i == 11){
+            const vertexes = Effect.fillMeshByRayCaster(geometries[i], 1000);
+            if(i === 11){
                 // 以 X 作为 Base
-                bufferGeometry.setAttribute('position', new THREE.BufferAttribute(vertexs, 3));
+                bufferGeometry.setAttribute('position', new THREE.BufferAttribute(vertexes, 3));
             }
-            bufferGeometry.setAttribute('p' + i, new THREE.BufferAttribute(vertexs, 3));
+            bufferGeometry.setAttribute('p' + i, new THREE.BufferAttribute(vertexes, 3));
+            for (let j = 0; j < 1000 * 3; j++) {
+                numberVertexes[i * 1000 * 3 + j] = vertexes[j];
+            }
         }
+        Effect.downloadFileByBlob(URL.createObjectURL(new Blob([numberVertexes.buffer])), "numbers.bin")
         this.numbers = new Array(14);
         for(let i = 0; i < 8; i++){
             this.numbers[i] = new THREE.Points(bufferGeometry, shaderMaterial.clone());
@@ -205,20 +189,36 @@ class ThreeDWorld {
             this.scene.add(this.numbers[i + 8]);
         }
     }
+
+    initNumbersWithCache(){
+        this.numbers = new Array(14);
+        for(let i = 0; i < 6; i++){
+            if (i !== 0){
+                this.numbers[i + 8] = new EffectNumber(this.scene);
+                this.numbers[i + 8].load(-48 * (i - 2), 24);
+            }
+        }
+        for(let i = 0; i < 8; i++){
+            this.numbers[i] = new EffectNumber(this.scene)
+            if (i === 2 || i === 5){
+                this.numbers[i].load(-48 * (i - 3) + 18, -64)
+            } else {
+                this.numbers[i].load(-48 * (i - 3), -64)
+            }
+        }
+    }
+
     update() {
         this.stats.begin();
         if(this.numbers){
-            let now = Date.now()
+            let now = new Date().getTime() - new Date('2012.11.22').getTime()
             let currentSecond = Math.floor(now / 1000)
             let secondProcess = now % 1000 / 1000
             let currentNumbers = this.solveNumbers(currentSecond)
             let nextNumbers = this.solveNumbers(currentSecond + 1)
             for(let i = 0; i < 14; i++){
-                this.numbers[i].material.uniforms.time.value = now % 1000000 / 1000
-                this.numbers[i].material.uniforms.process.value = this.cubic(secondProcess)
-                if(currentNumbers[i] != null){
-                    this.numbers[i].material.uniforms.current.value = currentNumbers[i]
-                    this.numbers[i].material.uniforms.next.value = nextNumbers[i]
+                if (currentNumbers[i] != null){
+                    this.numbers[i].update(now % 1000000 / 1000, this.cubic(secondProcess), currentNumbers[i], nextNumbers[i])
                 }
             }
         }
@@ -244,7 +244,7 @@ class ThreeDWorld {
         result[5] = 10;
         result[6] = hourOfDay % 10
         result[7] = Math.floor(hourOfDay / 10)
-        result[8] = 11;
+        result[8] = null;
         result[13] = Math.floor(day / 10000) % 10
         result[12] = Math.floor(day / 1000) % 10
         result[11] = Math.floor(day / 100) % 10
@@ -254,4 +254,4 @@ class ThreeDWorld {
     }
 }
 
-new ThreeDWorld(document.body);
+const world = new LoveEffectThreeWorld(document.body);

@@ -1,5 +1,5 @@
 {
-  "name": "3dpoints",
+  "name": "love-effect",
   "version": "1.0.0",
   "description": "基于Three.js的粒子特效，采用GPU渲染。",
   "main": "index.js",
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/youngdro/3DPoints#readme",
   "devDependencies": {
+    "copy-webpack-plugin": "^10.2.1",
     "css-loader": "^6.5.1",
     "html-webpack-plugin": "^5.5.0",
     "raw-loader": "^4.0.2",
