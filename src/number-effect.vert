@@ -51,6 +51,6 @@ void main() {
 	vec3 nextPosition = resolvePosition(next);
 	vec3 targetPosition = currentPosition * (1.0 - process) + nextPosition * process;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(targetPosition, 1.0);
-	gl_PointSize = 1600.0 / gl_Position.z * sin(position.y + time * 3.14 * 2.0);
+	gl_PointSize = 6400.0 / gl_Position.z * sin(position.y + time * 3.14 * 2.0);
 	opacity = sin(targetPosition.x * 0.1 + targetPosition.y * 0.1 + time);
 }

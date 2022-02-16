@@ -45,7 +45,7 @@ class LoveEffectThreeWorld {
         // 创建相机
         let aspectRatio = this.WIDTH / this.HEIGHT;
         let nearPlane = 1;
-        let farPlane = 1000;
+        let farPlane = 2000;
         let fieldOfView = 45;
         /**
          * PerspectiveCamera 透视相机
@@ -63,7 +63,7 @@ class LoveEffectThreeWorld {
 
         // 设置相机的位置
         this.camera.position.x = 0;
-        this.camera.position.z = 300;
+        this.camera.position.z = 900;
         this.camera.position.y = 0;
         // 创建渲染器
         this.renderer = new THREE.WebGLRenderer({
@@ -76,7 +76,7 @@ class LoveEffectThreeWorld {
         this.renderer.setClearColor(0x000000);
         // 定义渲染器的尺寸；在这里它会填满整个屏幕
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
-
+        this.renderer.setPixelRatio(window.devicePixelRatio);
         // 打开渲染器的阴影地图
         this.renderer.shadowMap.enabled = true;
         // this.renderer.shadowMapSoft = true;
@@ -195,7 +195,7 @@ class LoveEffectThreeWorld {
         for(let i = 0; i < 6; i++){
             if (i !== 0){
                 this.numbers[i + 8] = new EffectNumber(this.scene);
-                this.numbers[i + 8].load(-48 * (i - 2), 24);
+                this.numbers[i + 8].load(-48 * (i - 3) - 24, 24);
             }
         }
         for(let i = 0; i < 8; i++){
