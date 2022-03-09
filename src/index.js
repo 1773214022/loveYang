@@ -211,7 +211,7 @@ class LoveEffectThreeWorld {
     update() {
         this.stats.begin();
         if(this.numbers){
-            let now = new Date().getTime() - new Date('2012.11.22').getTime()
+            let now = new Date().getTime() - new Date('2022.01.27').getTime()
             let currentSecond = Math.floor(now / 1000)
             let secondProcess = now % 1000 / 1000
             let currentNumbers = this.solveNumbers(currentSecond)
